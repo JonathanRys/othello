@@ -86,6 +86,10 @@ const App = () => {
   };
 
   const handleClick = e => {
+    // Exclude events on elements lacking coordinates
+    if (!e.target.hasAttribute("x") || !e.target.hasAttribute("y")) {
+      return false;
+    }
     const x = e.target.getAttribute("x");
     const y = e.target.getAttribute("y");
 
