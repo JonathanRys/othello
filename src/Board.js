@@ -20,20 +20,10 @@ const Board = props => {
       row.push(<Cell x={i} y={j} key={`cell-${i}${j}`} color={color} />);
     }
     board.push(
-      React.createElement("div", { key: `row-${i}`, style: styles.row }, row)
+      React.createElement("div", { key: `row-${i}`, className: "row" }, row)
     );
   }
-  return <div style={styles.board}>{board}</div>;
-};
-
-const styles = {
-  board: {
-    border: "2px solid black",
-    display: "inline-block"
-  },
-  row: {
-    marginBottom: "-4px"
-  }
+  return <div className="board">{board}</div>;
 };
 
 export default Board;

@@ -27,7 +27,6 @@ const App = () => {
       let localY = +y + path.j;
 
       while (boardMap[localX][localY] !== playersTurn) {
-        console.log(boardMap[localX][localY] === !playersTurn);
         if (boardMap[localX][localY] === !playersTurn) {
           const newScore = score;
           newScore[+playersTurn] += 1;
