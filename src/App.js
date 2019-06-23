@@ -2,19 +2,24 @@ import React, { useState } from "react";
 import "./App.css";
 import Board from "./Board.js";
 
+const BLACK = false;
+const WHITE = true;
+
 const boardMap = [
   [null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null],
-  [null, null, null, true, false, null, null, null],
-  [null, null, null, false, true, null, null, null],
+  [null, null, null, WHITE, BLACK, null, null, null],
+  [null, null, null, BLACK, WHITE, null, null, null],
   [null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null]
 ];
 
 const App = () => {
-  const [playersTurn, setPlayersTurn] = useState(false);
+  const [playersTurn, setPlayersTurn] = useState(BLACK);
+  const [isLoading, setIsLoading] = useState(false);
+  const [score, setScore] = useState([2, 2]);
 
   const flipChips = (x, y, paths) => {
     paths.forEach(path => {
@@ -22,7 +27,15 @@ const App = () => {
       let localY = +y + path.j;
 
       while (boardMap[localX][localY] !== playersTurn) {
+        console.log(boardMap[localX][localY] === !playersTurn);
+        if (boardMap[localX][localY] === !playersTurn) {
+          const newScore = score;
+          newScore[+playersTurn] += 1;
+          newScore[+!playersTurn] -= 1;
+          setScore(newScore);
+        }
         boardMap[localX][localY] = playersTurn;
+
         localX += path.i;
         localY += path.j;
       }
@@ -30,12 +43,12 @@ const App = () => {
   };
 
   const isOnBoard = (x, y) => {
-    return x > 0 && y > 0 && x < boardMap[0].length && y < boardMap.length;
+    return x >= 0 && y >= 0 && x < boardMap[0].length && y < boardMap.length;
   };
 
   const isValid = (x, y) => {
     const adjacentTiles = [];
-    if (!x || !y || boardMap[x][y] !== null) return false;
+    if ([x, y].includes(undefined) || boardMap[x][y] !== null) return false;
 
     for (let i = -1; i < 2; i++) {
       const testX = +x + i;
@@ -44,7 +57,6 @@ const App = () => {
         const testY = +y + j;
 
         if (
-          !(+x === 0 && +y === 0) &&
           isOnBoard(testX, testY) &&
           boardMap[testX][testY] === !playersTurn
         ) {
@@ -57,8 +69,8 @@ const App = () => {
     const findValidPaths = tile => {
       let localX = +x + tile.i;
       let localY = +y + tile.j;
-
-      while (boardMap[localX][localY] !== null) {
+      // Check for validity first
+      while (isOnBoard(localX, localY) && boardMap[localX][localY] !== null) {
         if (boardMap[localX][localY] === playersTurn) {
           return true;
         }
@@ -82,28 +94,41 @@ const App = () => {
 
     if (validPaths) {
       boardMap[x][y] = playersTurn;
+      // Adjust the score
+      const newScore = score;
+      newScore[+playersTurn] += 1;
+      setScore(newScore);
+      // Flip the chips in between and cycle the turn
       flipChips(x, y, validPaths);
       setPlayersTurn(!playersTurn);
     }
   };
 
+  const handlePass = () => {
+    setIsLoading(true);
+    setTimeout(() => setIsLoading(false), 500);
+    setPlayersTurn(!playersTurn);
+  };
+
+  const getScore = player => {
+    return playersTurn === player ? `(${score[+player]})` : score[+player];
+  };
+
   return (
     <div className="App">
-      <header style={styles.header}>Othello</header>
-      <div>Player's turn: {playersTurn === false ? "black" : "white"}</div>
+      <header className="header">Othello</header>
+      <div className="panel">
+        <div>Player's turn: {playersTurn === BLACK ? "Black" : "White"}</div>
+        <div>{`Score: ${getScore(BLACK)} / ${getScore(WHITE)}`}</div>
+        <button className="button" disabled={isLoading} onClick={handlePass}>
+          Pass
+        </button>
+      </div>
       <div onClick={handleClick}>
         <Board map={boardMap} />
       </div>
     </div>
   );
-};
-
-const styles = {
-  header: {
-    fontSize: "24px",
-    fontWeight: "bold",
-    padding: "20px"
-  }
 };
 
 export default App;
