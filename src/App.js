@@ -5,7 +5,7 @@ import Board from "./Board.js";
 const BLACK = false;
 const WHITE = true;
 
-const boardMap = [
+const startingGrid = [
   [null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null],
@@ -16,10 +16,38 @@ const boardMap = [
   [null, null, null, null, null, null, null, null]
 ];
 
+const startingScore = [2, 2];
+
+const cloneBoard = board => {
+  const newBoard = [];
+  for (let i = 0; i < board[0].length; i++) {
+    newBoard[i] = [];
+    for (let j = 0; j < board.length; j++) {
+      newBoard[i][j] = board[i][j];
+    }
+  }
+  return newBoard;
+};
+
 const App = () => {
   const [playersTurn, setPlayersTurn] = useState(BLACK);
   const [isLoading, setIsLoading] = useState(false);
-  const [score, setScore] = useState([2, 2]);
+  const [score, setScore] = useState(startingScore);
+  const [boardMap, setBoardMap] = useState(cloneBoard(startingGrid));
+  const [lastBoardMap, setLastBoardMap] = useState(null);
+  const [gameOver, setGameOver] = useState(false);
+
+  const updateBoardMap = (x, y) => {
+    const newBoardMap = boardMap;
+    newBoardMap[x][y] = playersTurn;
+
+    setBoardMap(newBoardMap);
+  };
+
+  const setLoading = name => {
+    setIsLoading(name);
+    setTimeout(() => setIsLoading(false), 500);
+  };
 
   const flipChips = (x, y, paths) => {
     paths.forEach(path => {
@@ -32,8 +60,12 @@ const App = () => {
           newScore[+playersTurn] += 1;
           newScore[+!playersTurn] -= 1;
           setScore(newScore);
+          if (newScore[+playersTurn] + newScore[+!playersTurn] === 64) {
+            // Somebody won
+            setGameOver(true);
+          }
         }
-        boardMap[localX][localY] = playersTurn;
+        updateBoardMap(localX, localY);
 
         localX += path.i;
         localY += path.j;
@@ -65,6 +97,7 @@ const App = () => {
       }
     }
 
+    // This function needs to be in scope
     const findValidPaths = tile => {
       let localX = +x + tile.i;
       let localY = +y + tile.j;
@@ -96,11 +129,15 @@ const App = () => {
     const validPaths = isValid(x, y);
 
     if (validPaths) {
-      boardMap[x][y] = playersTurn;
+      setLastBoardMap(cloneBoard(boardMap));
+      // add the new chip to the board
+      updateBoardMap(x, y);
+
       // Adjust the score
       const newScore = score;
       newScore[+playersTurn] += 1;
       setScore(newScore);
+
       // Flip the chips in between and cycle the turn
       flipChips(x, y, validPaths);
       setPlayersTurn(!playersTurn);
@@ -108,8 +145,22 @@ const App = () => {
   };
 
   const handlePass = () => {
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 500);
+    if (gameOver) {
+      setBoardMap(cloneBoard(startingGrid));
+      setScore(startingScore);
+      // @todo JR figure out the number of moves left and set gameOver if 0 for each
+      setPlayersTurn(BLACK);
+      setGameOver(false);
+    } else {
+      setLoading("pass");
+      setPlayersTurn(!playersTurn);
+    }
+  };
+
+  const handleUndo = () => {
+    setLoading("undo");
+    setBoardMap(lastBoardMap);
+    setLastBoardMap(null);
     setPlayersTurn(!playersTurn);
   };
 
@@ -123,15 +174,28 @@ const App = () => {
       <div className="panel">
         <div>Player's turn: {playersTurn === BLACK ? "Black" : "White"}</div>
         <div>{`Score: ${getScore(BLACK)} / ${getScore(WHITE)}`}</div>
-        <button className="button" disabled={isLoading} onClick={handlePass}>
-          Pass
+        <button
+          className="button"
+          disabled={isLoading === "pass"}
+          onClick={handlePass}
+        >
+          {gameOver ? "New Game" : "Pass"}
         </button>
       </div>
-      <div onClick={handleClick}>
-        <Board map={boardMap} />
+      <Board map={boardMap} onClick={handleClick} />
+      <div className="panel right">
+        <button
+          className="button"
+          disabled={lastBoardMap === null || isLoading === "undo"}
+          onClick={handleUndo}
+        >
+          Undo
+        </button>
       </div>
     </div>
   );
 };
 
 export default App;
+
+export { startingGrid };

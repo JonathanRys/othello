@@ -23,7 +23,11 @@ const Board = props => {
       React.createElement("div", { key: `row-${i}`, className: "row" }, row)
     );
   }
-  return <div className="board">{board}</div>;
+  return (
+    <div className="board" onClick={props.onClick}>
+      {board}
+    </div>
+  );
 };
 
 export default Board;
