@@ -32,7 +32,7 @@ const cloneBoard = board => {
 const App = () => {
   const [playersTurn, setPlayersTurn] = useState(BLACK);
   const [isLoading, setIsLoading] = useState(false);
-  const [score, setScore] = useState(startingScore);
+  const [score, setScore] = useState([...startingScore]);
   const [boardMap, setBoardMap] = useState(cloneBoard(startingGrid));
   const [lastBoardMap, setLastBoardMap] = useState(null);
   const [gameOver, setGameOver] = useState(false);
@@ -147,7 +147,7 @@ const App = () => {
   const handlePass = () => {
     if (gameOver) {
       setBoardMap(cloneBoard(startingGrid));
-      setScore(startingScore);
+      setScore([...startingScore]);
       // @todo JR figure out the number of moves left and set gameOver if 0 for each
       setPlayersTurn(BLACK);
       setGameOver(false);
@@ -172,7 +172,7 @@ const App = () => {
     <div className="App">
       <header className="header">Othello</header>
       <div className="panel">
-        <div>Player's turn: {playersTurn === BLACK ? "Black" : "White"}</div>
+        <div>{playersTurn === BLACK ? "Black" : "White"}'s turn</div>
         <div>{`Score: ${getScore(BLACK)} / ${getScore(WHITE)}`}</div>
         <button
           className="button"
