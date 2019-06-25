@@ -62,3 +62,12 @@
 .right {
     justify-content: flex-end;
 }
+
+.winner {
+    color: green;
+    font-weight: bold;
+}
+
+.loser {
+    color: red;
+}

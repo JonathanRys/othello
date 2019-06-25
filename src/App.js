@@ -46,7 +46,7 @@ const App = () => {
 
   const setLoading = name => {
     setIsLoading(name);
-    setTimeout(() => setIsLoading(false), 500);
+    setTimeout(() => setIsLoading(false), 603);
   };
 
   const flipChips = (x, y, paths) => {
@@ -60,7 +60,7 @@ const App = () => {
           newScore[+playersTurn] += 1;
           newScore[+!playersTurn] -= 1;
           setScore(newScore);
-          if (newScore[+playersTurn] + newScore[+!playersTurn] === 64) {
+          if (newScore[+BLACK] + newScore[+WHITE] === 64) {
             // Somebody won
             setGameOver(true);
           }
@@ -165,15 +165,53 @@ const App = () => {
   };
 
   const getScore = player => {
-    return playersTurn === player ? `(${score[+player]})` : score[+player];
+    const playerScore = score[+player];
+    const opponentScore = score[+!player];
+    if (gameOver) {
+      if (playerScore > opponentScore) {
+        return <span className="winner">{playerScore}</span>;
+      } else if (playerScore < opponentScore) {
+        return <span className="loser">{playerScore}</span>;
+      }
+    }
+
+    return playerScore;
   };
+
+  let gameStatus = playersTurn === BLACK ? "Black's turn" : "White's turn";
+
+  const getCurrentScore = () => {
+    const blackScore = score[0];
+    const whiteScore = score[1];
+
+    if (blackScore === whiteScore) {
+      return null;
+    } else if (blackScore > whiteScore) {
+      return 0;
+    } else {
+      return 1;
+    }
+  };
+
+  if (gameOver) {
+    if (getCurrentScore()) {
+      gameStatus = "White wins!";
+    } else if (getCurrentScore() === 0) {
+      gameStatus = "Black Wins!";
+    }
+  }
 
   return (
     <div className="App">
       <header className="header">Othello</header>
       <div className="panel">
-        <div>{playersTurn === BLACK ? "Black" : "White"}'s turn</div>
-        <div>{`Score: ${getScore(BLACK)} / ${getScore(WHITE)}`}</div>
+        <div>{gameStatus}</div>
+        <div>
+          <span>Score: </span>
+          {getScore(BLACK)}
+          <span> / </span>
+          {getScore(WHITE)}
+        </div>
         <button
           className="button"
           disabled={isLoading === "pass"}
