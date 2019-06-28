@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./App.css";
 import Board from "./Board.js";
 
+/* Globals */
 const BLACK = false;
 const WHITE = true;
 
@@ -18,6 +19,7 @@ const startingGrid = [
 
 const startingScore = [2, 2];
 
+/* Helpers */
 const cloneBoard = board => {
   const newBoard = [];
   for (let i = 0; i < board[0].length; i++) {
@@ -29,6 +31,119 @@ const cloneBoard = board => {
   return newBoard;
 };
 
+const isOnBoard = (board, x, y) => {
+  return x >= 0 && y >= 0 && x < board[0].length && y < board.length;
+};
+
+const isSelf = (x, y) => x === 0 && y === 0;
+
+/* Scoring Functions */
+const findActiveNeighbors = (board, tile) => {
+  const activeTiles = [];
+  const availableTiles = [];
+
+  for (let i = -1; i < 2; i++) {
+    const x = tile.i + i;
+    for (let j = -1; j < 2; j++) {
+      const y = tile.j + j;
+      const neighbor = {
+        i: tile.i,
+        j: tile.j,
+        x: x,
+        y: y
+      };
+
+      if (isSelf(i, j) || !isOnBoard(board, x, y)) continue;
+
+      if (board[x][y] !== null) {
+        activeTiles.push(neighbor);
+      } else {
+        availableTiles.push(neighbor);
+      }
+    }
+  }
+
+  return {
+    neighbors: activeTiles,
+    available: availableTiles
+  };
+};
+
+const findDiscsInPlay = board => {
+  const neighbors = [];
+
+  for (let i = 0; i < board[0].length; i++) {
+    for (let j = 0; j < board.length; j++) {
+      if (isSelf(i, j)) continue;
+      if (board[i][j] !== null) {
+        neighbors.push({ i: i, j: j });
+      }
+    }
+  }
+  return neighbors;
+};
+
+const findFrontierDiscs = board => {
+  const discsInPlay = findDiscsInPlay(board);
+  const activeNeighbors = [];
+
+  for (let disc in discsInPlay) {
+    if (discsInPlay.hasOwnProperty(disc)) {
+      activeNeighbors.push(findActiveNeighbors(board, discsInPlay[disc]));
+    }
+  }
+  return activeNeighbors;
+};
+
+const getNumMoves = board => {
+  const frontierDiscs = findFrontierDiscs(board);
+
+  const legalMoves = frontierDiscs
+    .map(disc => {
+      const moves = {
+        true: [],
+        false: []
+      };
+
+      disc.available.forEach(tile => {
+        const myColor = board[tile.i][tile.j];
+
+        const diffI = tile.i - tile.x;
+        const diffJ = tile.j - tile.y;
+
+        let x = tile.i + diffI;
+        let y = tile.j + diffJ;
+
+        while (true) {
+          if (!isOnBoard(board, x, y) || board[x][y] === null) {
+            break;
+          } else if (board[x][y] === !myColor) {
+            moves[!myColor].push({ x: tile.x, y: tile.y });
+            break;
+          }
+          x += diffI;
+          y += diffJ;
+        }
+      });
+      return moves;
+    })
+    .reduce((acc, moves) => {
+      // convert these to forEach loops
+      for (let move in moves) {
+        if (moves.hasOwnProperty(move)) {
+          moves[move].forEach(spot => acc[move].push(spot));
+        }
+      }
+
+      return acc;
+    });
+  return legalMoves;
+};
+
+/****************************************
+ ********        Main App        ********
+ ****************************************/
+
 const App = () => {
   const [playersTurn, setPlayersTurn] = useState(BLACK);
   const [isLoading, setIsLoading] = useState(false);
@@ -36,6 +151,20 @@ const App = () => {
   const [boardMap, setBoardMap] = useState(cloneBoard(startingGrid));
   const [lastBoardMap, setLastBoardMap] = useState(null);
   const [gameOver, setGameOver] = useState(false);
+  const [hintClass, setHintClass] = useState("");
+  const [moves, setMoves] = useState([]);
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, [boardMap]);
+
+  const memoMoves = useCallback(player => getNumMoves(boardMap)[player], [
+    boardMap
+  ]);
+
+  useEffect(() => {
+    setMoves(memoMoves(playersTurn));
+  }, [playersTurn, memoMoves]);
 
   const updateBoardMap = (x, y) => {
     const newBoardMap = boardMap;
@@ -46,10 +175,10 @@ const App = () => {
 
   const setLoading = name => {
     setIsLoading(name);
-    setTimeout(() => setIsLoading(false), 603);
+    return setTimeout(() => setIsLoading(false), 603);
   };
 
-  const flipChips = (x, y, paths) => {
+  const flipDiscs = (x, y, paths) => {
     paths.forEach(path => {
       let localX = +x + path.i;
       let localY = +y + path.j;
@@ -60,7 +189,10 @@ const App = () => {
           newScore[+playersTurn] += 1;
           newScore[+!playersTurn] -= 1;
           setScore(newScore);
-          if (newScore[+BLACK] + newScore[+WHITE] === 64) {
+          if (
+            newScore[+BLACK] + newScore[+WHITE] === 64 ||
+            !(memoMoves(playersTurn) || memoMoves(!playersTurn))
+          ) {
             // Somebody won
             setGameOver(true);
           }
@@ -73,22 +205,18 @@ const App = () => {
     });
   };
 
-  const isOnBoard = (x, y) => {
-    return x >= 0 && y >= 0 && x < boardMap[0].length && y < boardMap.length;
-  };
-
   const isValid = (x, y) => {
     const adjacentTiles = [];
+    // Exclude other elements and occupied tiles
     if ([x, y].includes(undefined) || boardMap[x][y] !== null) return false;
 
     for (let i = -1; i < 2; i++) {
       const testX = +x + i;
-
       for (let j = -1; j < 2; j++) {
         const testY = +y + j;
 
         if (
-          isOnBoard(testX, testY) &&
+          isOnBoard(boardMap, testX, testY) &&
           boardMap[testX][testY] === !playersTurn
         ) {
           // store adjacent opponent tiles
@@ -102,7 +230,10 @@ const App = () => {
       let localX = +x + tile.i;
       let localY = +y + tile.j;
       // Check for validity first
-      while (isOnBoard(localX, localY) && boardMap[localX][localY] !== null) {
+      while (
+        isOnBoard(boardMap, localX, localY) &&
+        boardMap[localX][localY] !== null
+      ) {
         if (boardMap[localX][localY] === playersTurn) {
           return true;
         }
@@ -138,13 +269,15 @@ const App = () => {
       newScore[+playersTurn] += 1;
       setScore(newScore);
 
-      // Flip the chips in between and cycle the turn
-      flipChips(x, y, validPaths);
+      // Flip the discs in between and cycle the turn
+      flipDiscs(x, y, validPaths);
       setPlayersTurn(!playersTurn);
+      setHintClass("");
     }
   };
 
   const handlePass = () => {
+    setHintClass("");
     if (gameOver) {
       setBoardMap(cloneBoard(startingGrid));
       setScore([...startingScore]);
@@ -158,13 +291,14 @@ const App = () => {
   };
 
   const handleUndo = () => {
+    setHintClass("");
     setLoading("undo");
     setBoardMap(lastBoardMap);
     setLastBoardMap(null);
     setPlayersTurn(!playersTurn);
   };
 
-  const getScore = player => {
+  const getPlayerScore = player => {
     const playerScore = score[+player];
     const opponentScore = score[+!player];
     if (gameOver) {
@@ -176,6 +310,10 @@ const App = () => {
     }
 
     return playerScore;
+  };
+
+  const showHint = () => {
+    setHintClass(" show-hint");
   };
 
   let gameStatus = playersTurn === BLACK ? "Black's turn" : "White's turn";
@@ -201,27 +339,38 @@ const App = () => {
     }
   }
 
+  /****************************************
+   ********      Render Block      ********
+   ****************************************/
+
   return (
-    <div className="App">
+    <div className={`App${hintClass}`}>
       <header className="header">Othello</header>
       <div className="panel">
         <div>{gameStatus}</div>
         <div>
           <span>Score: </span>
-          {getScore(BLACK)}
+          {getPlayerScore(BLACK)}
           <span> / </span>
-          {getScore(WHITE)}
+          {getPlayerScore(WHITE)}
         </div>
         <button
           className="button"
-          disabled={isLoading === "pass"}
+          disabled={isLoading === "pass" || memoMoves(playersTurn).length}
           onClick={handlePass}
         >
           {gameOver ? "New Game" : "Pass"}
         </button>
       </div>
-      <Board map={boardMap} onClick={handleClick} />
-      <div className="panel right">
+      <Board map={boardMap} moves={moves} onClick={handleClick} />
+      <div className="panel">
+        <button
+          className="button"
+          disabled={isLoading === "hint"}
+          onClick={showHint}
+        >
+          Hint
+        </button>
         <button
           className="button"
           disabled={lastBoardMap === null || isLoading === "undo"}

@@ -17,7 +17,18 @@ const Board = props => {
         color = "white";
       }
 
-      row.push(<Cell x={i} y={j} key={`cell-${i}${j}`} color={color} />);
+      const isMove = props.moves.filter(move => move.x === i && move.y === j);
+      const hintClass = isMove.length ? " hint" : "";
+
+      row.push(
+        <Cell
+          x={i}
+          y={j}
+          key={`cell-${i}${j}`}
+          className={hintClass}
+          color={color}
+        />
+      );
     }
     board.push(
       React.createElement("div", { key: `row-${i}`, className: "row" }, row)
