@@ -178,29 +178,34 @@ const App = () => {
     return setTimeout(() => setIsLoading(false), 603);
   };
 
+  const gameIsOver = score => {
+    return (
+      score[+BLACK] + score[+WHITE] === 64 ||
+      !(memoMoves(playersTurn).length && memoMoves(!playersTurn).length)
+    );
+  };
+
   const flipDiscs = (x, y, paths) => {
     paths.forEach(path => {
       let localX = +x + path.i;
       let localY = +y + path.j;
+      const newScore = score;
 
       while (boardMap[localX][localY] !== playersTurn) {
         if (boardMap[localX][localY] === !playersTurn) {
-          const newScore = score;
           newScore[+playersTurn] += 1;
           newScore[+!playersTurn] -= 1;
           setScore(newScore);
-          if (
-            newScore[+BLACK] + newScore[+WHITE] === 64 ||
-            !(memoMoves(playersTurn) || memoMoves(!playersTurn))
-          ) {
-            // Somebody won
-            setGameOver(true);
-          }
         }
         updateBoardMap(localX, localY);
 
         localX += path.i;
         localY += path.j;
+      }
+
+      if (gameIsOver(newScore)) {
+        // Somebody won
+        setGameOver(true);
       }
     });
   };
