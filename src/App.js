@@ -312,8 +312,9 @@ const App = () => {
     return playerScore;
   };
 
-  const showHint = () => {
-    setHintClass(" show-hint");
+  const toggleHint = () => {
+    const newClass = hintClass === "" ? " show-hint" : "";
+    setHintClass(newClass);
   };
 
   let gameStatus = playersTurn === BLACK ? "Black's turn" : "White's turn";
@@ -367,7 +368,7 @@ const App = () => {
         <button
           className="button"
           disabled={isLoading === "hint"}
-          onClick={showHint}
+          onClick={toggleHint}
         >
           Hint
         </button>
