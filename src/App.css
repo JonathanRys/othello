@@ -1,32 +1,69 @@
+body {
+    background-image: url('./images/tabletop - oak.jpg');
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: repeat-y;
+    background-size: auto;
+}
+
 .App {
     text-align: center;
 }
 
+.App .white-text {
+    color: white;
+}
+
+.App .black-text {
+    color: black;
+    font-weight: bold;
+}
+
 .header {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: bold;
     padding: 20px;
+    text-shadow: 1px 1px 30px white, 1px -1px 30px white, -1px 1px 30px white, -1px -1px 30px white;
 }
 
 .panel {
     align-items: center;
     display: flex;
     justify-content: space-between;
-    margin: 5px auto;
-    max-width: 320px;
+    margin: 10px auto;
+    max-width: 300px;
 }
 
 .button {
-    border: 1px solid black;
+    background: linear-gradient(#f1f1f1, #acacac);
+    border: 2px solid black;
     border-radius: 8px;
+    cursor: pointer;
     outline: none;
     padding: 5px 12px;
-    cursor: pointer;
+}
+
+.button:hover {
+    background: linear-gradient(#cccccc, #f1f1f1);
+    box-shadow: -1px -1px 10px rgba(239, 239, 239, 0.2), 1px -1px 10px rgba(239, 239, 239, 0.2), -1px 1px 10px rgba(239, 239, 239, 0.2), 1px 1px 10px rgba(239, 239, 239, 0.2);
+    text-shadow: 1px 1px 1px white, 1px -1px 1px white, -1px 1px 1px white, -1px -1px 1px white;
+}
+
+.button:disabled {
+    background: linear-gradient(#dddddd, #8d8d8d);
+    cursor: default;
+}
+
+.button:disabled:hover {
+    background: linear-gradient(#dddddd, #8d8d8d);
+    box-shadow: none;
+    text-shadow: none;
 }
 
 .board {
     border: 2px solid black;
     border-radius: 3px;
+    box-shadow: 1px 1px 5px black, 1px -1px 5px black, -1px 1px 5px black, -1px -1px 5px black;
     display: inline-block
 }
 
@@ -39,17 +76,17 @@
     border: 1px solid black;
     box-sizing: border-box;
     display: inline-block;
-    height: 40px;
-    width: 40px;
+    height: 38px;
+    width: 38px;
 }
 
 .chip {
     border: 1px solid black;
     border-radius: 50%;
     display: none;
-    height: 32px;
-    width: 32px;
-    margin: 3px;
+    height: 30px;
+    width: 30px;
+    margin: 2px;
 }
 
 .black {
@@ -69,10 +106,12 @@
 .winner {
     color: #009c46;
     font-weight: bold;
+    text-shadow: 1px 1px 5px white, 1px -1px 5px white, -1px 1px 5px white, -1px -1px 5px white;
 }
 
 .loser {
     color: red;
+    text-shadow: 1px 1px 3px #ddd, 1px -1px 3px #ddd, -1px 1px 3px #ddd, -1px -1px 3px #ddd;
 }
 
 .show-hint .hint {

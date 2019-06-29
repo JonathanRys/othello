@@ -189,14 +189,17 @@ const App = () => {
   };
 
   const flipDiscs = (x, y, paths) => {
+    const newScore = [...score];
+    // Add one for the new disc
+    newScore[+playersTurn] += 1;
     paths.forEach(path => {
       let localX = +x + path.i;
       let localY = +y + path.j;
-      const newScore = [...score];
-      // Add one for the new disc
-      newScore[+playersTurn] += 1;
 
       while (boardMap[localX][localY] !== playersTurn) {
+        if (!isOnBoard(boardMap, localX, localY)) {
+          console.log("invalid move!!!", localX, localY);
+        }
         newScore[+playersTurn] += 1;
         newScore[+!playersTurn] -= 1;
 
@@ -206,14 +209,15 @@ const App = () => {
         localY += path.j;
       }
 
-      setScore(newScore);
-      setLastScore(score);
-
       if (gameIsOver(newScore)) {
         // Somebody won
         setGameOver(true);
       }
     });
+    console.log("setting score:", newScore, score);
+    console.log("score total:", newScore[0] + newScore[1]);
+    setScore(newScore);
+    setLastScore([...score]);
   };
 
   const isValid = (x, y) => {
@@ -340,14 +344,19 @@ const App = () => {
     }
   };
 
+  let statusClass = playersTurn === BLACK ? "black-text" : "white-text";
+
   if (gameOver) {
     const currentScore = getCurrentScore();
     if (currentScore) {
       gameStatus = "White wins!";
+      statusClass = "white-text";
     } else if (currentScore === 0) {
       gameStatus = "Black Wins!";
+      statusClass = "black-text";
     } else if (currentScore === null) {
       gameStatus = "Tied game";
+      statusClass = "black-text";
     }
   }
 
@@ -359,12 +368,12 @@ const App = () => {
     <div className={`App${hintClass}`}>
       <header className="header">Othello</header>
       <div className="panel">
-        <div>{gameStatus}</div>
+        <div className={statusClass}>{gameStatus}</div>
         <div>
-          <span>Score: </span>
-          {getPlayerScore(BLACK)}
+          <span className="black-text">Score: </span>
+          <span className="black-text">{getPlayerScore(BLACK)}</span>
           <span> / </span>
-          {getPlayerScore(WHITE)}
+          <span className="white-text">{getPlayerScore(WHITE)}</span>
         </div>
         <button
           className="button"
