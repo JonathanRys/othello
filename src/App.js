@@ -158,6 +158,8 @@ const App = () => {
     setIsLoading(false);
   }, [boardMap]);
 
+  // create a memoized function so it can be used as a dependency in useEffect
+  // without causing it to execute on every rerender
   const memoMoves = useCallback(player => getNumMoves(boardMap)[player], [
     boardMap
   ]);
@@ -181,7 +183,7 @@ const App = () => {
   const gameIsOver = score => {
     return (
       score[+BLACK] + score[+WHITE] === 64 ||
-      !(memoMoves(playersTurn).length && memoMoves(!playersTurn).length)
+      (!memoMoves(playersTurn).length && !memoMoves(!playersTurn).length)
     );
   };
 
@@ -285,6 +287,7 @@ const App = () => {
     setHintClass("");
     if (gameOver) {
       setBoardMap(cloneBoard(startingGrid));
+      setLastBoardMap(null);
       setScore([...startingScore]);
       // @todo JR figure out the number of moves left and set gameOver if 0 for each
       setPlayersTurn(BLACK);
@@ -338,10 +341,13 @@ const App = () => {
   };
 
   if (gameOver) {
-    if (getCurrentScore()) {
+    const currentScore = getCurrentScore();
+    if (currentScore) {
       gameStatus = "White wins!";
-    } else if (getCurrentScore() === 0) {
+    } else if (currentScore === 0) {
       gameStatus = "Black Wins!";
+    } else if (currentScore === null) {
+      gameStatus = "Tied game";
     }
   }
 
@@ -372,14 +378,14 @@ const App = () => {
       <div className="panel">
         <button
           className="button"
-          disabled={isLoading === "hint"}
+          disabled={isLoading === "hint" || gameOver}
           onClick={toggleHint}
         >
           Hint
         </button>
         <button
           className="button"
-          disabled={lastBoardMap === null || isLoading === "undo"}
+          disabled={lastBoardMap === null || isLoading === "undo" || gameOver}
           onClick={handleUndo}
         >
           Undo

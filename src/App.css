@@ -33,7 +33,7 @@
 }
 
 .cell {
-    background-color: #36bc56;
+    background-color: #009c46;
     border: 1px solid black;
     box-sizing: border-box;
     display: inline-block;
@@ -65,7 +65,7 @@
 }
 
 .winner {
-    color: green;
+    color: #009c46;
     font-weight: bold;
 }
 
@@ -74,5 +74,5 @@
 }
 
 .show-hint .hint {
-    border: 2px solid goldenrod;
+    border: 2px solid gold;
 }
