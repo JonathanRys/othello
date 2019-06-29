@@ -148,6 +148,7 @@ const App = () => {
   const [playersTurn, setPlayersTurn] = useState(BLACK);
   const [isLoading, setIsLoading] = useState(false);
   const [score, setScore] = useState([...startingScore]);
+  const [lastScore, setLastScore] = useState([...startingScore]);
   const [boardMap, setBoardMap] = useState(cloneBoard(startingGrid));
   const [lastBoardMap, setLastBoardMap] = useState(null);
   const [gameOver, setGameOver] = useState(false);
@@ -191,19 +192,22 @@ const App = () => {
     paths.forEach(path => {
       let localX = +x + path.i;
       let localY = +y + path.j;
-      const newScore = score;
+      const newScore = [...score];
+      // Add one for the new disc
+      newScore[+playersTurn] += 1;
 
       while (boardMap[localX][localY] !== playersTurn) {
-        if (boardMap[localX][localY] === !playersTurn) {
-          newScore[+playersTurn] += 1;
-          newScore[+!playersTurn] -= 1;
-          setScore(newScore);
-        }
+        newScore[+playersTurn] += 1;
+        newScore[+!playersTurn] -= 1;
+
         updateBoardMap(localX, localY);
 
         localX += path.i;
         localY += path.j;
       }
+
+      setScore(newScore);
+      setLastScore(score);
 
       if (gameIsOver(newScore)) {
         // Somebody won
@@ -271,12 +275,7 @@ const App = () => {
       // add the new chip to the board
       updateBoardMap(x, y);
 
-      // Adjust the score
-      const newScore = score;
-      newScore[+playersTurn] += 1;
-      setScore(newScore);
-
-      // Flip the discs in between and cycle the turn
+      // Flip the discs in between, cycle the turn and adjust the score
       flipDiscs(x, y, validPaths);
       setPlayersTurn(!playersTurn);
       setHintClass("");
@@ -302,6 +301,7 @@ const App = () => {
     setHintClass("");
     setLoading("undo");
     setBoardMap(lastBoardMap);
+    setScore(lastScore);
     setLastBoardMap(null);
     setPlayersTurn(!playersTurn);
   };
