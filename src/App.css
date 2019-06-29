@@ -19,7 +19,9 @@
 .button {
     border: 1px solid black;
     border-radius: 8px;
+    outline: none;
     padding: 5px 12px;
+    cursor: pointer;
 }
 
 .board {
@@ -75,4 +77,5 @@
 
 .show-hint .hint {
     border: 2px solid gold;
+    cursor: pointer;
 }
