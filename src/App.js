@@ -214,8 +214,7 @@ const App = () => {
         setGameOver(true);
       }
     });
-    console.log("setting score:", newScore, score);
-    console.log("score total:", newScore[0] + newScore[1]);
+
     setScore(newScore);
     setLastScore([...score]);
   };
@@ -366,22 +365,24 @@ const App = () => {
 
   return (
     <div className={`App${hintClass}`}>
-      <header className="header">Othello</header>
-      <div className="panel">
-        <div className={statusClass}>{gameStatus}</div>
-        <div>
-          <span className="black-text">Score: </span>
-          <span className="black-text">{getPlayerScore(BLACK)}</span>
-          <span> / </span>
-          <span className="white-text">{getPlayerScore(WHITE)}</span>
+      <div className="top-section">
+        <header className="header">Othello</header>
+        <div className="panel">
+          <div className={statusClass}>{gameStatus}</div>
+          <div>
+            <span className="black-text">Score: </span>
+            <span className="black-text">{getPlayerScore(BLACK)}</span>
+            <span> / </span>
+            <span className="white-text">{getPlayerScore(WHITE)}</span>
+          </div>
+          <button
+            className="button"
+            disabled={isLoading === "pass" || memoMoves(playersTurn).length}
+            onClick={handlePass}
+          >
+            {gameOver ? "New Game" : "Pass"}
+          </button>
         </div>
-        <button
-          className="button"
-          disabled={isLoading === "pass" || memoMoves(playersTurn).length}
-          onClick={handlePass}
-        >
-          {gameOver ? "New Game" : "Pass"}
-        </button>
       </div>
       <Board map={boardMap} moves={moves} onClick={handleClick} />
       <div className="panel">

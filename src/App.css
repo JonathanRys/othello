@@ -64,7 +64,8 @@ body {
     border: 2px solid black;
     border-radius: 3px;
     box-shadow: 1px 1px 5px black, 1px -1px 5px black, -1px 1px 5px black, -1px -1px 5px black;
-    display: inline-block
+    display: inline-block;
+    min-width: 304px;
 }
 
 .row {
@@ -117,4 +118,25 @@ body {
 .show-hint .hint {
     border: 2px solid gold;
     cursor: pointer;
+}
+
+@media screen and (orientation: landscape) {
+    .App {
+        display: flex;
+        justify-content: space-evenly;
+    }
+    .panel {
+        flex-direction: column;
+        justify-content: inherit;
+        margin: 10px;
+    }
+    .board {
+        margin-top: 6px;
+    }
+    .panel>div {
+        margin: 5px;
+    }
+    .button {
+        margin: 15px;
+    }
 }
