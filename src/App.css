@@ -1,3 +1,7 @@
+html, body {
+    height: 100%;
+}
+
 body {
     background-image: url('./images/tabletop - oak.jpg');
     background-attachment: fixed;
@@ -120,7 +124,13 @@ body {
     cursor: pointer;
 }
 
-@media screen and (orientation: landscape) {
+@media screen and (orientation: landscape) and (max-height: 500px) {
+    #root {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
     .App {
         display: flex;
         justify-content: space-evenly;
