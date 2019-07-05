@@ -26,6 +26,7 @@ body {
 .header {
     font-size: 28px;
     font-weight: bold;
+    letter-spacing: -2px;
     padding: 20px;
     text-shadow: 1px 1px 30px white, 1px -1px 30px white, -1px 1px 30px white, -1px -1px 30px white;
 }
@@ -33,6 +34,7 @@ body {
 .panel {
     align-items: center;
     display: flex;
+    font-family: 'Hind', sans-serif;
     justify-content: space-between;
     margin: 10px auto;
     max-width: 300px;
@@ -43,6 +45,8 @@ body {
     border: 2px solid black;
     border-radius: 8px;
     cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
     outline: none;
     padding: 5px 12px;
 }
