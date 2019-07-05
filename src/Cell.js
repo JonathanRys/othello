@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 
 const Cell = props => {
   return (
@@ -8,4 +8,4 @@ const Cell = props => {
   );
 };
 
-export default Cell;
+export default memo(Cell);
